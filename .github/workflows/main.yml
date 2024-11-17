@@ -1,4 +1,4 @@
-name: IDA Pro Analysis
+name: IDA Analysis
 
 on:
   workflow_dispatch:
@@ -11,6 +11,16 @@ on:
         description: "GDrive link of the file"
         required: true
         type: string
+      generate_c:
+        description: "Generate C pseudocode"
+        required: false
+        type: boolean
+        default: false
+      installer_link:
+        description: "GDrive link of the installer"
+        required: false
+        type: string
+        default: 1zXAhAcXvWe6TRagdjMKwI4_HF_bgH-Lo
 
 jobs:
   ida_analysis:
@@ -18,7 +28,7 @@ jobs:
 
     steps:
     - name: Checkout Repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Install Dependencies
       run: |
@@ -30,7 +40,7 @@ jobs:
 
     - name: Download IDA Pro Installer
       run: |
-        gdown -O idapro_90_x64linux.run 1O4TXaXyVYSSb9hxnrmIY4an491qtLEge
+        gdown -O idapro_90_x64linux.run ${{ github.event.inputs.installer_link }}
 
     - name: Install IDA Pro
       run: |
@@ -61,8 +71,22 @@ jobs:
       run: |
         $HOME/idapro-9.0/idat64 -P+ -A -S"analyse.idc" ${{ github.event.inputs.target_file }}
 
+    - name: Generate C Pseudocode
+      if: ${{ github.event.inputs.generate_c }}
+      run: |
+        python3 ida90_pseudocode.py -f ${{ github.event.inputs.target_file }}.i64
+
     - name: Upload Analysed Database
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ github.event.inputs.target_file }}
+        name: ${{ github.event.inputs.target_file }}-Database
         path: ${{ github.event.inputs.target_file }}.i64
+        compression-level: 9
+
+    - name: Upload Pseudocode
+      uses: actions/upload-artifact@v4
+      if: ${{ github.event.inputs.generate_c }}
+      with:
+        name: ${{ github.event.inputs.target_file }}-Pseudocode
+        path: ${{ github.event.inputs.target_file }}.c
+        compression-level: 9
