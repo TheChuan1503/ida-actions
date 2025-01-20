@@ -71,10 +71,6 @@ jobs:
       run: |
         $HOME/idapro-9.0/idat64 -P+ -A -S"analyse.idc" ${{ github.event.inputs.target_file }}
 
-    - name: Generate C Pseudocode
-      if: ${{ github.event.inputs.generate_c }}
-      run: |
-        python3 ida90_pseudocode.py -f ${{ github.event.inputs.target_file }}.i64
 
     - name: Upload Analysed Database
       uses: actions/upload-artifact@v4
@@ -83,10 +79,4 @@ jobs:
         path: ${{ github.event.inputs.target_file }}.i64
         compression-level: 9
 
-    - name: Upload Pseudocode
-      uses: actions/upload-artifact@v4
-      if: ${{ github.event.inputs.generate_c }}
-      with:
-        name: ${{ github.event.inputs.target_file }}-Pseudocode
-        path: ${{ github.event.inputs.target_file }}.c
-        compression-level: 9
+
