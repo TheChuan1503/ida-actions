@@ -70,7 +70,7 @@ jobs:
         pip install $HOME/idapro-9.0/idalib/python
         python3 $HOME/idapro-9.0/idalib/python/py-activate-idalib.py
         python3 ida90_eula.py
-
+        export PATH=$PATH:$HOME/idapro-9.0
     - name: Download File for Analysis
       run: |
         gdown --fuzzy -O ${{ github.event.inputs.target_file }} ${{ github.event.inputs.file_link }}
