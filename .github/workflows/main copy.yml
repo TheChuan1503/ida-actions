@@ -1,4 +1,4 @@
-name: IDA Analysis
+name: IDA Analysis and BinDiff
 
 on:
   workflow_dispatch:
@@ -9,7 +9,7 @@ on:
         type: string
       target1_file:
         description: "Name of the second file"
-        required: false
+        required: true
         type: string
       file_link:
         description: "GDrive link of the file"
@@ -17,7 +17,7 @@ on:
         type: string
       file1_link:
         description: "GDrive link of the second file"
-        required: false
+        required: true
         type: string
       generate_c:
         description: "Generate C pseudocode"
