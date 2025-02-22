@@ -7,9 +7,17 @@ on:
         description: "Name of the file"
         required: true
         type: string
+      target1_file:
+        description: "Name of the second file"
+        required: false
+        type: string
       file_link:
         description: "GDrive link of the file"
         required: true
+        type: string
+      file1_link:
+        description: "GDrive link of the second file"
+        required: false
         type: string
       generate_c:
         description: "Generate C pseudocode"
