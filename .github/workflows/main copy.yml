@@ -80,6 +80,7 @@ jobs:
     - name: Run IDA Pro Headless Analysis
       run: |
         $HOME/idapro-9.0/idat64 -P+ -A -S"analyse.idc" ${{ github.event.inputs.target_file }}
+        $HOME/idapro-9.0/idat64 -P+ -A -S"analyse.idc" ${{ github.event.inputs.target1_file }}
     - name: Setup BinDiff
       uses: cs2-analysis/setup-bindiff@v1
 
