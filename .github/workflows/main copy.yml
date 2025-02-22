@@ -7,10 +7,12 @@ on:
         description: "Name of the file"
         required: true
         type: string
+        default: "normal"
       target1_file:
         description: "Name of the second file"
         required: true
         type: string
+        default: "normal1"
       file_link:
         description: "GDrive link of the file"
         required: true
