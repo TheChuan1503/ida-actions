@@ -1,33 +1,33 @@
-name: IDA Analysis and BinDiff
+name: IDA 分析和 BinDiff (IDA Pro 9.0)
 
 on:
   workflow_dispatch:
     inputs:
       target_file:
-        description: "Name of the file"
+        description: "一号文件名"
         required: true
         type: string
         default: "normal"
       target1_file:
-        description: "Name of the second file"
+        description: "二号文件名"
         required: true
         type: string
         default: "normal1"
       file_link:
-        description: "GDrive link of the file"
+        description: "一号文件 GDrive 链接"
         required: true
         type: string
       file1_link:
-        description: "GDrive link of the second file"
+        description: "二号文件 GDrive 链接"
         required: true
         type: string
       generate_c:
-        description: "Generate C pseudocode"
+        description: "生成 C 伪代码"
         required: false
         type: boolean
         default: false
       installer_link:
-        description: "GDrive link of the installer"
+        description: "IDA 安装器的 GDrive 链接"
         required: false
         type: string
         default: 1zXAhAcXvWe6TRagdjMKwI4_HF_bgH-Lo
@@ -37,10 +37,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Repository
+    - name: 检查仓库
       uses: actions/checkout@v4
 
-    - name: Install Dependencies
+    - name: 安装依赖
       run: |
         sudo apt update
         sudo apt -y install python3 python3-pip pipx
@@ -48,16 +48,16 @@ jobs:
         pipx ensurepath
         source ~/.profile
 
-    - name: Download IDA Pro Installer
+    - name: 下载 IDA Pro 安装器
       run: |
         gdown -O idapro_90_x64linux.run ${{ github.event.inputs.installer_link }}
 
-    - name: Install IDA Pro
+    - name: 安装 IDA Pro
       run: |
         chmod +x idapro_90_x64linux.run
         ./idapro_90_x64linux.run --mode unattended
 
-    - name: Patch IDA Pro
+    - name: 修补 IDA Pro
       run: |
         cp $HOME/idapro-9.0/libida.so .
         cp $HOME/idapro-9.0/libida64.so .
@@ -67,24 +67,24 @@ jobs:
         mv ida.hexlic $HOME/.idapro/
         rm libida.so libida64.so
 
-    - name: Setup IDA Pro
+    - name: 安装 IDA Pro
       run: |
         pip install $HOME/idapro-9.0/idalib/python
         python3 $HOME/idapro-9.0/idalib/python/py-activate-idalib.py
         python3 ida90_eula.py
         export PATH=$PATH:$HOME/idapro-9.0
-    - name: Download File for Analysis
+    - name: 下载文件
       run: |
         gdown --fuzzy -O ${{ github.event.inputs.target_file }} ${{ github.event.inputs.file_link }}
         gdown --fuzzy -O ${{ github.event.inputs.target1_file }} ${{ github.event.inputs.file1_link }}
-    - name: Run IDA Pro Headless Analysis
+    - name: 分析
       run: |
         $HOME/idapro-9.0/idat64 -P+ -A -S"analyse.idc" ${{ github.event.inputs.target_file }}
         $HOME/idapro-9.0/idat64 -P+ -A -S"analyse.idc" ${{ github.event.inputs.target1_file }}
-    - name: Setup BinDiff
+    - name: 安装 BinDiff
       uses: cs2-analysis/setup-bindiff@v1
 
-    - name: Upload Analysed Database
+    - name: 上传 IDB 文件
       uses: actions/upload-artifact@v4
       with:
         name: ${{ github.event.inputs.target_file }}-Database
