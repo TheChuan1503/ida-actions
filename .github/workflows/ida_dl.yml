@@ -1,0 +1,80 @@
+name: IDA 分析 (IDA Pro 9.0, 通过直链)
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_file:
+        description: "文件名"
+        required: true
+        type: string
+      file_link:
+        description: "二进制文件直链"
+        required: true
+        type: string
+      generate_c:
+        description: "生成 C 伪代码"
+        required: false
+        type: boolean
+        default: true
+      installer_link:
+        description: "IDA 安装器的 GDrive 链接"
+        required: false
+        type: string
+        default: 1zXAhAcXvWe6TRagdjMKwI4_HF_bgH-Lo
+
+jobs:
+  ida_analysis:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 检查
+      uses: actions/checkout@v4
+
+    - name: 安装依赖
+      run: |
+        sudo apt update
+        sudo apt -y install python3 python3-pip pipx
+        pipx install gdown
+        pipx ensurepath
+        source ~/.profile
+
+    - name: 下载 IDA Pro 安装器
+      run: |
+        gdown -O idapro_90_x64linux.run ${{ github.event.inputs.installer_link }}
+
+    - name: 安装 IDA Pro
+      run: |
+        chmod +x idapro_90_x64linux.run
+        ./idapro_90_x64linux.run --mode unattended
+
+    - name: 修补 IDA Pro
+      run: |
+        cp $HOME/idapro-9.0/libida.so .
+        cp $HOME/idapro-9.0/libida64.so .
+        python3 ida90_beta.py
+        mv libida.so.patched $HOME/idapro-9.0/libida.so
+        mv libida64.so.patched $HOME/idapro-9.0/libida64.so
+        mv ida.hexlic $HOME/.idapro/
+        rm libida.so libida64.so
+
+    - name: 配置 IDA Pro
+      run: |
+        pip install $HOME/idapro-9.0/idalib/python
+        python3 $HOME/idapro-9.0/idalib/python/py-activate-idalib.py
+        python3 ida90_eula.py
+
+    - name: 下载文件
+      run: |
+        wget -O ${{ github.event.inputs.target_file }} ${{ github.event.inputs.file_link }}
+
+    - name: 分析
+      run: |
+        $HOME/idapro-9.0/idat64 -P+ -A -S"analyse.idc" ${{ github.event.inputs.target_file }}
+
+
+    - name: 上传 IDB 文件
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ github.event.inputs.target_file }}-Database
+        path: ${{ github.event.inputs.target_file }}.i64
+        compression-level: 9
